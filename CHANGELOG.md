@@ -11,6 +11,79 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 2.7.0
+
+### Changed
+
+- **The glow means something now.** It used to sit on every server icon, every
+  button and every panel at once, faintly and permanently. When everything
+  glows, glowing is the resting state and says nothing.
+
+  Nothing glows at rest any more. In exchange the remaining states are stronger
+  than before, because each one hits a single element and is therefore worth
+  looking at: what you hover, where you are, what is unread, who is speaking.
+
+  The one exception is your own avatar in the bottom left. It is not a signal
+  but the anchor of the interface, and the collapsed panel consists of it.
+
+- The message bar no longer glows at rest. It carried the effect permanently
+  and was thus the brightest thing on screen without ever having anything to
+  report. It lights up on focus instead.
+
+### Added
+
+- **Unread servers get a glowing dot.** Discord marks them with a small grey
+  indicator that has to be looked for; it now lights up in the theme colour.
+  The open server keeps Discord's elongated shape but takes the second colour,
+  so "I am here" stays distinguishable from "something is new".
+
+  The server icon itself deliberately stays dark. Dot and icon together turn
+  one message into two.
+
+- **Mention badges are hearts.** The red circle with the count becomes a heart
+  in the theme colour, using the same outline as the avatars. The number stays
+  centred where the shape is widest.
+
+### Fixed
+
+- Two rules still referenced `item_caf372`, a hash that no longer exists. They
+  had been doing nothing for a while.
+
+### Notes
+
+The unread state has no class with "unread" in it, which a first attempt
+assumed. Discord simply shows the indicator by adding `visible` to it, and that
+is the anchor to hang things on.
+
+---
+
+## 2.6.0
+
+### Changed
+
+- **The bottom-left panel opens and closes as one motion.** Previously the
+  frame snapped to size while only Stream and Voice glided, and all of them at
+  once. Everything is staggered now, and closing runs the same sequence
+  backwards and slightly faster.
+
+  The frame still snaps rather than animating, and that stays deliberate:
+  animating `width` forces a layout recalculation of the whole sidebar every
+  frame, and at a fixed size the mouse would sit over nothing in the gaps
+  between cards, dropping `:hover` mid-motion. What changed is that the
+  collapse is now *delayed* - the children are gone before the frame folds.
+
+- Sidebar spacing is now handled per view. Discord already shortens the server
+  and channel lists itself; only the DM list needed the full clearance, and
+  applying it everywhere cost visible space.
+
+### Notes
+
+Most of the work went into values that cannot be interpolated - `box-shadow:
+none`, `width: auto`, `margin: 0 auto`. Each discards the transition along with
+its delay and jumps immediately, which looks like a timing problem but is not.
+
+---
+
 ## 2.5.0
 
 ### Fixed

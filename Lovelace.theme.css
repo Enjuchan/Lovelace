@@ -1,7 +1,7 @@
 /**
  * @name Lovelace
  * @author Enju
- * @version 2.6.0
+ * @version 2.7.0
  * @description Frosted glass Discord theme with heart-shaped avatars, collapsible panels and a soft blue-pink glow.
  * @source https://github.com/Enjuchan/Lovelace/blob/main/Lovelace.theme.css
  * @updateUrl https://raw.githubusercontent.com/Enjuchan/Lovelace/main/Lovelace.theme.css
@@ -217,18 +217,27 @@
                Herz-Silhouette. Fuer alles Beschnittene.
        box   = box-shadow. Folgt dem Rechteck. Fuer Kaesten und Knoepfe.
 
-     Drei Stufen ueberall gleich: Ruhe kaum sichtbar, Hover deutlich, Aktiv
-     atmend. Frueher hatte jede Regel eigene Werte - deshalb wirkten einzelne
-     Stellen aufgesetzt statt zugehoerig.
+     LEITGEDANKE: Leuchten heisst "hier passiert gerade etwas".
 
-     Ruhe bewusst mit nur EINEM Schatten: diese Werte liegen auf vielen
-     Elementen gleichzeitig. Der zweite Ton kommt erst beim Hover, wo immer
-     nur eines betroffen ist.                                             */
-  --lv-glow-shape:       drop-shadow(0 0 3px var(--glow-pink-soft));
-  --lv-glow-shape-hover: drop-shadow(0 0 5px var(--glow-blue))
-                         drop-shadow(0 0 8px var(--glow-pink-soft));
-  --lv-glow-box:         0 0 3px 0 var(--glow-blue-soft);
-  --lv-glow-box-hover:   var(--glow-ring-strong);
+     Im Ruhezustand leuchtet nichts. Frueher lag ein schwacher Schein auf
+     saemtlichen Server-Icons, Knoepfen und Panels gleichzeitig - wenn aber
+     alles glimmt, ist Glimmen der Normalzustand und sagt nichts mehr aus.
+
+     Dafuer duerfen die uebrigen Stufen kraeftiger sein als zuvor: Sie treffen
+     jeweils nur ein einzelnes Element, und weil sie selten sind, faellt jedes
+     davon auf. Weniger Stellen, dafuer deutlich.
+
+       ruhe   = gar nichts
+       hover  = was man gerade anfasst
+       aktiv  = wo man ist, was ungelesen ist, wer spricht           */
+  --lv-glow-shape-hover:  drop-shadow(0 0 6px var(--glow-blue))
+                          drop-shadow(0 0 11px var(--glow-pink-soft));
+  --lv-glow-shape-active: drop-shadow(0 0 5px var(--glow-pink))
+                          drop-shadow(0 0 12px var(--glow-blue-soft));
+  --lv-glow-box-hover:    0 0 6px 1px var(--glow-blue),
+                          0 0 12px 2px var(--glow-pink-soft);
+  --lv-glow-box-active:   0 0 5px 1px var(--glow-pink),
+                          0 0 12px 2px var(--glow-blue-soft);
 
   /* --- Herzform -------------------------------------------------------
      Prozentwerte, funktioniert dadurch bei jeder Icon-Groesse gleich.
@@ -1006,10 +1015,17 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
 [class*="chat_"]:has([class*="actionRow_"]) { border: unset !important; }
 [class*="chat_"]:has([class*="actionRow_"]) [class*="form_"] { margin: unset !important; }
 
+/* Der Schein liegt auf dem Fokus, nicht im Ruhezustand - siehe Abschnitt 8.
+   Vorher leuchtete die Leiste dauerhaft, obwohl es dort nichts zu melden gab;
+   sie war damit die auffaelligste Stelle des Fensters, ohne Anlass. */
 [class*="channelBottomBarArea_"] {
   border-radius: var(--panel-radius);
   backdrop-filter: blur(var(--blur-other));
-  box-shadow: var(--glow-ring);
+  transition: box-shadow 0.25s ease;
+}
+
+html:not(.lv-no-glow) [class*="channelBottomBarArea_"]:focus-within {
+  box-shadow: var(--lv-glow-box-hover);
 }
 
 .channelTextArea_f75fb0 { background: transparent !important; }
@@ -1330,11 +1346,13 @@ html:not(.lv-no-hearts) :is(
    Die Abschaltung laeuft ueber html.lv-no-glow und nicht mehr allein ueber
    --lv-glow-anim: none. Die Variable stoppt nur die Atmung, der ruhende
    box-shadow blieb sichtbar - abgeschalteter Glow leuchtete also weiter. */
+/* .item_caf372.active_caf372 stand hier frueher mit drin - dieser Hash
+   existiert nicht mehr, die Regel lief also ins Leere. Der Indikator wird
+   inzwischen als leuchtender Punkt behandelt, weiter unten. */
 html:not(.lv-no-glow) :is(
   [class*="panel_"],
   .wrapper_e131a9,
   .container__37e49,
-  .item_caf372.active_caf372,
   .channel__972a0 .interactiveSelected__972a0
 )::after {
   content: "";
@@ -1350,7 +1368,6 @@ html:not(.lv-no-glow) :is(
   transition: box-shadow 0.18s ease;
 }
 
-.item_caf372.active_caf372,
 .channel__972a0 .interactiveSelected__972a0 {
   position: relative;
   border-radius: 6px;
@@ -1377,11 +1394,13 @@ html:not(.lv-no-glow) :is(
    aktuellen Discord-Fassungen nicht mehr, die Serverleiste hatte deshalb GAR
    KEINEN Glow. Jetzt ueber die Leiste selbst: [data-list-id="guildsnav"] ist
    ein Funktionsbezeichner und ueberlebt Hash-Wechsel. */
+/* Im Ruhezustand KEIN Glow. Die Regel setzt nur die Voraussetzungen, damit die
+   Zustaende darunter greifen koennen: overflow, damit der Schein nicht am Rand
+   abgeschnitten wird, und den Uebergang. */
 html:not(.lv-no-glow):not(.lv-no-hearts)
 [data-list-id="guildsnav"] [class*="wrapper_"]:has(> svg) {
   overflow: visible;
-  transition: filter 0.2s ease;
-  filter: var(--lv-glow-shape);
+  transition: filter 0.25s ease;
 }
 
 html:not(.lv-no-glow)
@@ -1394,6 +1413,12 @@ html:not(.lv-no-glow)
 [data-list-id="guildsnav"] [class*="wrapper_"]:has(> svg):is([class*="selected_"], :has([class*="selected_"])) {
   animation: glow-breathe-heart 4s ease-in-out infinite;
 }
+
+/* Ungelesene Server bekommen BEWUSST keinen Icon-Glow.
+
+   Ein Versuch damit sah nach zu viel aus: Der leuchtende Punkt daneben sagt
+   dasselbe, und beides zusammen macht aus einer Meldung zwei. Der Punkt ist
+   das Signal, das Icon bleibt das Icon. */
 
 /* --- Account-Avatar unten links -----------------------------------------
    Bewusst nur hier und nicht auf allen Avataren: sonst haengen zwei
@@ -1434,6 +1459,11 @@ html:not(.lv-no-glow) [class*="panels_"] [class*="wrapper_"]:has(> svg[class*="m
   overflow: visible;
 }
 
+/* Der eigene Avatar ist die eine Ausnahme vom Prinzip und leuchtet dauerhaft.
+
+   Begruendung: Er ist kein Signal, sondern der Ankerpunkt der Oberflaeche -
+   das eingeklappte Panel BESTEHT aus ihm. Ein Herz, das dort ruhig leuchtet,
+   ist das Erkennungszeichen des Themes, kein Hinweis auf Aktivitaet. */
 html:not(.lv-no-glow) [class*="panels_"] [class*="wrapper_"]:has(> svg[class*="mask_"])::before {
   content: "";
   position: absolute;
@@ -1535,19 +1565,96 @@ html:not(.lv-no-glow) .border__2f4f7.speaking__2f4f7 {
   animation: glow-pulse-strong 1.1s ease-in-out infinite;
 }
 
-/* --- Knoepfe und DM-Liste ------------------------------------------------ */
+/* --- Knoepfe und DM-Liste ------------------------------------------------
+   Im Ruhezustand ohne Schein. Vorher lag auf jedem Knopf und jedem DM-Eintrag
+   dauerhaft einer - bei einer langen DM-Liste flimmerte damit die halbe
+   Seitenleiste, ohne dass ein einziger Eintrag dadurch wichtiger wurde. */
 .buttons__37e49 button { border-radius: 6px; }
 .channel__972a0 .interactive__972a0 { border-radius: 8px; }
 
 html:not(.lv-no-glow) .buttons__37e49 button,
 html:not(.lv-no-glow) .channel__972a0 .interactive__972a0 {
-  box-shadow: var(--lv-glow-box);
   transition: box-shadow 0.2s ease;
 }
 
 html:not(.lv-no-glow) .buttons__37e49 button:hover,
 html:not(.lv-no-glow) .channel__972a0 .interactive__972a0:hover {
   box-shadow: var(--lv-glow-box-hover);
+}
+
+/* Der gerade geoeffnete DM-Eintrag bleibt markiert - dort ist man, das ist
+   eine Aussage. */
+html:not(.lv-no-glow) .channel__972a0 .interactiveSelected__972a0 {
+  box-shadow: var(--lv-glow-box-active);
+}
+
+/* --- Der leuchtende Punkt ------------------------------------------------
+   Discord markiert ungelesene Server und den aktuellen Kanal mit einem
+   schmalen grauen Balken links am Rand. Der ist funktional, aber unscheinbar -
+   man muss ihn suchen.
+
+   Daraus wird ein leuchtender Punkt. Dasselbe Motiv benutzen LovelaceSettings
+   fuer aktive Schalter und DynamicBackgrounds fuer das laufende Bild; damit
+   bekommen Theme und Plugins dieselbe Sprache fuer "hier ist etwas aktiv".
+
+   Der Punkt sitzt auf demselben Element wie der Balken, es aendert sich nur
+   dessen Form: quadratisch statt lang, voll gerundet, und mit Schein. */
+/* Form und Groesse kommen von Discord: ungelesen ist bereits ein 8px-Punkt,
+   der geoeffnete Server eine laengliche Pille. Beides ist sinnvoll, es fehlt
+   nur die Sichtbarkeit - grau auf dunkelgrau muss man suchen.
+
+   [class*="visible_"] ist der Zustand "wird angezeigt". Ohne diese Einschraen-
+   kung leuchtet auch der unsichtbare Indikator jedes gelesenen Servers. */
+html:not(.lv-no-glow)
+[data-list-id="guildsnav"] [class*="item_"][class*="visible_"] {
+  background: var(--glow-pink) !important;
+  box-shadow: 0 0 6px 1px var(--glow-pink),
+              0 0 11px 2px var(--glow-pink-soft);
+  transition: box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+/* Der geoeffnete Server in der anderen Farbe. Discord macht ihn ohnehin
+   laenglich, damit bleibt "hier bin ich" von "hier ist etwas neu"
+   unterscheidbar - ueber Form UND Farbe. */
+html:not(.lv-no-glow)
+[data-list-id="guildsnav"] [class*="item_"][class*="selected_"],
+html:not(.lv-no-glow)
+[data-list-id="guildsnav"] li:has([class*="selected_"]) [class*="item_"][class*="visible_"] {
+  background: var(--glow-blue) !important;
+  box-shadow: 0 0 6px 1px var(--glow-blue),
+              0 0 12px 2px var(--glow-pink-soft);
+}
+
+/* --- Erwaehnungszaehler als Herz -----------------------------------------
+   Der rote Kreis mit der Zahl wird zum Herz in der Theme-Farbe. Die Herzform
+   liegt ohnehin als Variable bereit, es ist also dieselbe Kontur wie bei den
+   Avataren.
+
+   Die Zahl bleibt lesbar, weil das Herz in seiner Mitte am breitesten ist -
+   genau dort steht sie. Etwas mehr Flaeche und Innenabstand geben ihr Luft,
+   sonst geraet sie bei zweistelligen Werten an die Kanten.
+
+   Bewusst kein Rot: Discord faerbt hier alarmierend, das Theme hat dafuer
+   seinen eigenen Ton. Der Schein macht es auffaellig genug. */
+html:not(.lv-no-hearts) [data-list-id="guildsnav"] [class*="numberBadge_"],
+html:not(.lv-no-hearts) [data-list-id="guildsnav"] [class*="baseShapeRound_"][class*="badge_"] {
+  clip-path: var(--heart-clip);
+  border-radius: 0 !important;
+  background: var(--glow-pink) !important;
+  min-width: 20px !important;
+  height: 18px !important;
+  padding: 0 4px 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Der Schein liegt auf dem Elternteil, nicht auf dem Badge selbst: clip-path
+   wird nach dem Filter angewendet und wuerde einen Schatten mit wegschneiden -
+   dasselbe Thema wie beim Avatar-Glow weiter oben. */
+html:not(.lv-no-glow):not(.lv-no-hearts)
+[data-list-id="guildsnav"] :has(> [class*="numberBadge_"]) {
+  filter: drop-shadow(0 0 5px var(--glow-pink-soft));
 }
 
 /* --- Schreibleiste -------------------------------------------------------
@@ -1557,13 +1664,9 @@ html:not(.lv-no-glow) .channel__972a0 .interactive__972a0:hover {
    Jetzt dieselbe Logik wie ueberall sonst: im Ruhezustand nichts, beim
    Schreiben der Hover-Glow. Der Effekt erscheint dort, wo die Aufmerksamkeit
    ohnehin schon ist, statt dauerhaft zu leuchten. */
-html:not(.lv-no-glow) [class*="channelTextArea_"] {
-  transition: box-shadow 0.25s ease;
-}
-
-html:not(.lv-no-glow) [class*="channelTextArea_"]:focus-within {
-  box-shadow: var(--lv-glow-box-hover);
-}
+/* Die Regel sitzt bei der Leiste selbst in Abschnitt 6, weil dort auch ihr
+   Rahmen und die Weichzeichnung stehen - zwei Stellen fuer dasselbe Element
+   waeren eine Falle beim naechsten Anfassen. */
 
 
 /* ============================================================================
