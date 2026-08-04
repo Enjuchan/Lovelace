@@ -11,6 +11,20 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 3.0.2
+
+### Changed
+
+- The rule that hands the background over to DynamicBackgrounds now matches both
+  `.DynamicBackgrounds-bgContainer` and the older `.BackgroundManager-bgContainer`.
+  The plugin renamed its CSS classes in 3.7.2, and without this a mismatched pair
+  of versions would paint two backgrounds on top of each other, with the theme's
+  own one covering the plugin's transitions and effects.
+
+  The old name can go once 3.7.2 has been out for a while.
+
+---
+
 ## 3.0.1
 
 ### Fixed
