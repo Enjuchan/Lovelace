@@ -20,6 +20,29 @@ left, and a soft blue-pink glow that reacts to what you are doing.
 
 ---
 
+## Screenshots
+
+![Lovelace in a server](screenshots/overview.jpg)
+
+The bottom-left panel expanded on hover, with the voice controls, the stream
+panel and the Spotify player:
+
+![The expanded bottom-left panel](screenshots/panel.jpg)
+
+The emoji picker stretched to the full height of the window:
+
+![The enlarged emoji picker](screenshots/picker.jpg)
+
+The glow is two colours in one place, so a change carries through the whole
+client. The same view with the default palette and with the Moss preset, set
+through [LovelaceSettings](https://github.com/Enjuchan/LovelaceSettings):
+
+![Default colours](screenshots/settings.jpg)
+
+![The Moss preset](screenshots/settings-moss.jpg)
+
+---
+
 ## Features
 
 ### Glass surfaces
