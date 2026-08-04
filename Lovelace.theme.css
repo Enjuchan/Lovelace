@@ -174,6 +174,41 @@
      DynamicBackgrounds-Plugin ohne Blur nutzt, kann --blur-list hochsetzen
      und bekommt echtes Milchglas.                                        */
   --list-color:  rgba(255, 255, 255, 0.04);
+
+  /* --- Tiefenstaffelung der Spalten ------------------------------------
+     Die drei Spalten liegen nicht nebeneinander, sondern HINTEREINANDER.
+
+     Vorher trugen Serverleiste, Kanalliste und Mitgliederliste dieselbe
+     Fuellung; sie liefen dadurch ineinander und das Bild wirkte flach. Andere
+     Themes loesen das mit abgesetzten Karten und Luecken - das ist
+     Papier-Optik und passt nicht zu Glas.
+
+     Glas staffelt anders: Was weiter hinten liegt, ist dunkler und staerker
+     verschwommen. Die Serverleiste sitzt am tiefsten, die Kanalliste
+     darueber, der Chat ganz vorn. Dieselbe Klarheit, aber ohne eine einzige
+     Trennlinie.
+
+     Die Lichtkante ist der zweite Teil: eine feine helle Linie an der Kante
+     jeder Ebene, wie sie an echtem Glas entsteht. Sie ersetzt die Luecke. */
+  --depth-rail:   rgba(0, 0, 0, 0.22);      /* Serverleiste, hinterste Ebene */
+  --depth-list:   rgba(0, 0, 0, 0.10);      /* Kanal- und Mitgliederliste     */
+  --depth-blur:   6px;                      /* zusaetzlich zur Listen-Unschaerfe */
+  --edge-light:   rgba(255, 255, 255, 0.07);
+
+  /* --- Der schwebende Chat ---------------------------------------------
+     Server- und Kanalliste bilden eine durchgehende Grundplatte, der
+     Nachrichtenbereich liegt als abgesetzte Flaeche darauf.
+
+     Der Gedanke dahinter: Die Bereiche sind nicht gleichwertig. Man liest und
+     schreibt im Chat, die Leisten sind Navigation. Sie alle als gleiche
+     Karten nebeneinanderzustellen - wie es andere Themes tun - behandelt
+     Beiwerk wie Hauptsache.
+
+     --app-gap ist der Abstand ringsum, --chat-lift der Schatten darunter. Auf
+     0 gesetzt sitzt der Chat wieder bündig wie zuvor.                     */
+  --app-gap:      8px;
+  --chat-fill:    rgba(255, 255, 255, 0.05);
+  --chat-lift:    0 6px 22px rgba(0, 0, 0, 0.3);
   --list-border: rgba(255, 255, 255, 0.06);
   --blur-list:   0px;
 
@@ -813,6 +848,13 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
 
 /* --- Account-Panel ----------------------------------------------------- */
 
+/* Das Panel rueckt vom Rand ab, damit es als eigenes Element auf der
+   Grundplatte liegt statt in der Ecke zu kleben. Derselbe Abstand wie beim
+   schwebenden Chat, damit beide Kanten auf einer Linie sitzen. */
+[class*="sidebar_"] [class*="panels_"] {
+  margin: 0 0 var(--app-gap) var(--app-gap) !important;
+}
+
 /* Eingeklappt: nur der Avatar, ohne Karte. Ausgeklappt volle Karte.
 
    Groesse und Innenabstand schalten weiterhin HART um - beides loest ein
@@ -833,9 +875,16 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
   align-items: center !important;
   justify-content: center !important;
   overflow: visible !important;
-  background: none !important;
-  border: none !important;
-  backdrop-filter: none !important;
+  /* Auch eingeklappt eine Glaskarte, nicht nur ein freistehender Avatar.
+
+     Vorher stand der Avatar nackt in der Ecke; mit Flaeche und Rundung wird
+     daraus ein erkennbares Element, das zum schwebenden Chat passt - gleicher
+     Radius, gleiche Kante. Aufgeklappt waechst dieselbe Karte weiter, es
+     wechselt also nichts, es wird nur groesser. */
+  background-color: var(--panel-color) !important;
+  border: var(--border-subtle) !important;
+  border-radius: var(--panel-radius) !important;
+  backdrop-filter: blur(var(--blur-other)) !important;
   z-index: 10 !important;
   /* Dieselbe Wartezeit wie der aeussere Container. Ohne sie sprang die Karte
      sofort auf Avatargroesse zurueck, waehrend die Panels darueber noch
@@ -1812,11 +1861,64 @@ nav[class*="guilds_"],
   backdrop-filter: blur(var(--blur-list));
 }
 
-/* Feine Trennkanten statt harter Raender - sie sollen gliedern, nicht
-   zerschneiden. */
-nav[class*="guilds_"] { border-right: 1px solid var(--list-border); }
-[class*="sidebarList_"] { border-right: 1px solid var(--list-border); }
-[class*="membersWrap_"] { border-left: 1px solid var(--list-border); }
+/* --- Tiefenstaffelung ----------------------------------------------------
+   Siehe Abschnitt 2. Was weiter hinten liegt, wird dunkler und unschaerfer -
+   dadurch trennen sich die Spalten, ohne dass eine Linie noetig waere.
+
+   Die Werte liegen bewusst auf einer eigenen Regel NACH der Grundfuellung:
+   background-color wird ueberschrieben, die Unschaerfe kommt hinzu. Wer die
+   Staffelung nicht mag, setzt --depth-rail und --depth-list auf transparent,
+   dann greift wieder das flache Bild von vorher. */
+nav[class*="guilds_"] {
+  background-color: var(--depth-rail) !important;
+  backdrop-filter: blur(calc(var(--blur-list) + var(--depth-blur)));
+}
+
+[class*="sidebarList_"],
+[class*="membersWrap_"] {
+  background-color: var(--depth-list) !important;
+  backdrop-filter: blur(calc(var(--blur-list) + var(--depth-blur) / 2));
+}
+
+/* Lichtkante statt Trennlinie.
+
+   inset legt sie INNEN an die Kante, dadurch sitzt sie exakt am Uebergang und
+   verschiebt nichts. Das ist der Unterschied zu einem border: der wuerde einen
+   Pixel Platz kosten und die Spalte verschieben.
+
+   Die Serverleiste bekommt sie rechts, die Mitgliederliste links - jeweils
+   dort, wo die naechste Ebene beginnt. */
+nav[class*="guilds_"] {
+  box-shadow: inset -1px 0 0 0 var(--edge-light);
+}
+
+[class*="sidebarList_"] {
+  box-shadow: inset -1px 0 0 0 var(--edge-light);
+}
+
+[class*="membersWrap_"] {
+  box-shadow: inset 1px 0 0 0 var(--edge-light);
+}
+
+/* --- Der schwebende Chat -------------------------------------------------
+   Siehe Abschnitt 2. Der Nachrichtenbereich loest sich von der Grundplatte:
+   Abstand nach oben, unten und rechts, gerundet, mit weichem Schatten.
+
+   Links bleibt er buendig - dort liegt die Grundplatte, und eine Karte, die
+   auf einer Platte liegt, beruehrt sie. Ein Abstand auf allen vier Seiten
+   liesse ihn stattdessen frei schweben, was die Zusammengehoerigkeit von
+   Kanalliste und Chat aufloest.
+
+   overflow: hidden ist noetig, damit der Inhalt die runden Ecken nicht
+   ueberlaeuft - Nachrichten reichen sonst bis in die Ecken hinein. */
+[class*="base_"] [class*="chat_"] {
+  margin: var(--app-gap) var(--app-gap) var(--app-gap) 0 !important;
+  border-radius: var(--panel-radius);
+  border: var(--border-subtle);
+  background-color: var(--chat-fill) !important;
+  box-shadow: var(--chat-lift);
+  overflow: hidden;
+}
 
 /* Die DM-Liste erbt Flaeche und Kante von sidebarList_ und bleibt selbst
    transparent - sonst waere sie doppelt gefuellt. */
