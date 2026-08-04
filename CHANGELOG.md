@@ -11,6 +11,65 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 3.0.0
+
+Dark edged glass. The look changes substantially, hence the major version.
+
+### Changed
+
+- **Corners are gone.** `--panel-radius` is 0. On dark glass the cut edge is
+  what makes it read as material; rounding turns the same surfaces into
+  buttons. Set it back to `10px` for the old look.
+
+- **The columns are darker and staggered by depth.** Server rail furthest back
+  and most blurred, channel and member lists one layer forward, the message
+  area at the front. They used to share one fill and ran into each other.
+
+  Separation comes from brightness and a hairline of light at each edge, not
+  from gaps or borders. Other themes solve this with detached cards, which is
+  paper logic; glass separates by depth.
+
+- **Category headings are centred**, framed by two lines that fade towards the
+  text. Channel names deliberately stay left-aligned: scanning a list needs a
+  fixed left edge, while a heading is read on its own.
+
+- **The user panel blends in** instead of sitting there as a bordered card. It
+  carries the same fill as the list above it and a single light edge, like
+  every other transition in the picture.
+
+- Surfaces are thinner overall. Glass should let through; the separating work
+  is done by blur and light edges, not by opacity.
+
+### Added
+
+- **The default background is a computed gradient**, not a photo. Nothing to
+  load, no dead link when a host disappears, sharp at any resolution.
+
+  More importantly it is built from the glow colours: change them in the plugin
+  and the background follows. Picture and interface can no longer drift apart.
+
+  A fine noise layer sits on top. Gradients across a full screen show banding -
+  visible steps between colour stops - and noise breaks those edges up without
+  reading as grain.
+
+### Notes
+
+Three things about the glow ring, in case anyone is tempted to change it back.
+
+Both stages must point the same way. With the resting state inset and the hover
+state outset, hovering did not change the strength but the kind of effect, and
+the outer shadow was clipped at the edge.
+
+Inset was tried on the theory that an outer ring follows the corners of a
+square surface and reads as a drawn border. In practice the outer glow lifts
+the surface off the background while the inset one muddied it.
+
+And centring a heading needs the heading itself to span the full width. Three
+attempts adjusted its children; the element was 114px wide inside a 247px
+container, so there was never anything to centre.
+
+---
+
 ## 2.7.0
 
 ### Changed

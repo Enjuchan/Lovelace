@@ -1,7 +1,7 @@
 /**
  * @name Lovelace
  * @author Enju
- * @version 2.7.0
+ * @version 3.0.0
  * @description Frosted glass Discord theme with heart-shaped avatars, collapsible panels and a soft blue-pink glow.
  * @source https://github.com/Enjuchan/Lovelace/blob/main/Lovelace.theme.css
  * @updateUrl https://raw.githubusercontent.com/Enjuchan/Lovelace/main/Lovelace.theme.css
@@ -77,8 +77,17 @@
 :root {
   /* --- Panels --------------------------------------------------------- */
   --panel-gap:      16px;
-  --panel-radius:   10px;
-  --panel-color:    rgba(255, 255, 255, 0.06);
+  /* Kantig, nicht gerundet. Bei dunklem Glas ist die Schnittkante das, was es
+     nach Material aussehen laesst - Rundungen machen daraus Knoepfe.
+
+     Auf 8px oder 10px gesetzt kehrt die weiche Optik zurueck, falls die Kanten
+     irgendwann zu hart wirken. */
+  --panel-radius:   0px;
+  /* Bewusst schwach. Die Flaechen sollen Glas sein, nicht Milchglasplatten -
+     je hoeher der Wert, desto massiver wirken sie und desto weniger kommt vom
+     Hintergrund durch. Die Trennung leisten Unschaerfe und Lichtkanten, nicht
+     die Deckkraft. */
+  --panel-color:    rgba(255, 255, 255, 0.035);
   --panel-collapsed: 56px;
   /* Freiraum am unteren Ende von Server-Leiste, Kanalliste und DM-Liste.
      Ohne ihn laufen sie hinter dem Panel weiter und die untersten Eintraege
@@ -111,7 +120,47 @@
      --bg-image ist die einzige Stelle, die man zum Wechseln anfassen muss.
      --bg-base ist die Farbe, die zu sehen ist, solange das Bild noch laedt
      oder falls die URL nicht erreichbar ist.                              */
-  --bg-image:  url("https://files.catbox.moe/3rm4cl.jpg");
+  /* Standard ist ein gerechneter Verlauf, kein Foto.
+
+     Vorteile gegenueber einer Bilddatei: nichts wird geladen, es gibt keinen
+     toten Link wenn der Hoster verschwindet, und er ist bei jeder Aufloesung
+     gestochen scharf statt hochskaliert.
+
+     Der eigentliche Grund ist aber, dass er aus den Glow-Farben gebaut ist:
+     Wer im Plugin die Farbe wechselt, aendert damit auch den Hintergrund. Bild
+     und Oberflaeche koennen also nicht mehr auseinanderlaufen.
+
+     Ein eigenes Bild setzt man wie bisher:
+         :root { --bg-image: url("https://..."); }                          */
+  /* Feines Rauschen gegen Streifenbildung.
+
+     Ein Verlauf ueber eine bildschirmgrosse Flaeche hat pro Farbstufe hunderte
+     Pixel, und der Sprung zur naechsten wird als Band sichtbar - es sieht aus
+     wie eine Grafik mit zu wenig Farben. Ein aufgelegtes Rauschen bricht diese
+     Kanten auf; bei dieser Deckkraft nimmt man es nicht als Koernung wahr,
+     sondern nur das Fehlen der Streifen.
+
+     Als SVG direkt eingebettet, damit keine Datei geladen werden muss. */
+  --bg-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.5'/></svg>");
+
+  /* Die Werte sind bewusst SEHR hell angesetzt. Der Hintergrund laeuft durch
+     brightness(--brightness-bg-image), das standardmaessig auf 40% steht - ein
+     bereits dunkler Verlauf kommt dort als Schwarz heraus. Was hier im Code
+     grell wirkt, ist auf dem Bildschirm richtig.
+
+     Die Farbflecken nutzen die vollen Glow-Toene, nicht die weichen: nach der
+     Abdunklung bleibt von den weichen nichts uebrig.
+
+     Mehrere Zwischenstopps im Verlauf, weil weite Spruenge das Banding
+     verstaerken - je kuerzer der Weg zwischen zwei Farben, desto weniger
+     sichtbare Stufen. */
+  --bg-image:
+    var(--bg-noise),
+    radial-gradient(circle at 22% 18%, var(--glow-blue) 0%, transparent 42%),
+    radial-gradient(circle at 82% 80%, var(--glow-pink) 0%, transparent 45%),
+    linear-gradient(148deg,
+      #6f6aa0 0%, #7d6ba8 22%, #8a6fa4 42%,
+      #7a679c 62%, #625a8c 82%, #4e4a76 100%);
   --bg-base:   #0a0a11;
   /* 1 = unveraendert, 0.4 = auf 40% abgedunkelt. Dunkler heisst besser
      lesbarer Text und ruhigere Glaspanels. */
@@ -190,10 +239,14 @@
 
      Die Lichtkante ist der zweite Teil: eine feine helle Linie an der Kante
      jeder Ebene, wie sie an echtem Glas entsteht. Sie ersetzt die Luecke. */
-  --depth-rail:   rgba(0, 0, 0, 0.22);      /* Serverleiste, hinterste Ebene */
-  --depth-list:   rgba(0, 0, 0, 0.10);      /* Kanal- und Mitgliederliste     */
+  --depth-rail:   rgba(0, 0, 0, 0.42);      /* Serverleiste, hinterste Ebene */
+  --depth-list:   rgba(0, 0, 0, 0.26);      /* Kanal- und Mitgliederliste     */
+  --depth-chat:   rgba(0, 0, 0, 0.10);      /* Nachrichtenbereich, vorderste  */
   --depth-blur:   6px;                      /* zusaetzlich zur Listen-Unschaerfe */
-  --edge-light:   rgba(255, 255, 255, 0.07);
+  --edge-light:   rgba(255, 255, 255, 0.06);
+  /* Kraeftiger als --edge-light: Die Linien neben den Kategorien sollen
+     auffallen, nicht nur gliedern. */
+  --edge-strong:  rgba(255, 255, 255, 0.22);
 
   /* --- Der schwebende Chat ---------------------------------------------
      Server- und Kanalliste bilden eine durchgehende Grundplatte, der
@@ -204,11 +257,16 @@
      Karten nebeneinanderzustellen - wie es andere Themes tun - behandelt
      Beiwerk wie Hauptsache.
 
-     --app-gap ist der Abstand ringsum, --chat-lift der Schatten darunter. Auf
-     0 gesetzt sitzt der Chat wieder bündig wie zuvor.                     */
-  --app-gap:      8px;
-  --chat-fill:    rgba(255, 255, 255, 0.05);
-  --chat-lift:    0 6px 22px rgba(0, 0, 0, 0.3);
+     Die Spalten sitzen BUENDIG aneinander, ohne Abstand und ohne Rundung.
+
+     Ein Zwischenstand hatte den Chat abgesetzt und gerundet. Das sah fuer sich
+     genommen gut aus, mischt aber zwei Sprachen: Rundung und Abstand gehoeren
+     zu Karten auf einer Flaeche, dunkles Kantenglas lebt von der Schnittkante.
+     Beides zusammen wirkt unentschieden.
+
+     --app-gap bleibt als Stellschraube erhalten: auf 8px gesetzt schwebt der
+     Chat wieder.                                                          */
+  --app-gap:      0px;
   --list-border: rgba(255, 255, 255, 0.06);
   --blur-list:   0px;
 
@@ -220,8 +278,21 @@
   --glow-pink-soft: rgba(255, 90, 190, 0.35);
 
   /* Fertige Schatten-Rezepte - einmal definiert, ueberall wiederverwendet */
-  --glow-ring:        0 0 8px 1px var(--glow-blue-soft), 0 0 13px 2px var(--glow-pink-soft);
-  --glow-ring-strong: 0 0 6px 1px var(--glow-blue),      0 0 10px 2px var(--glow-pink-soft);
+  /* Nach aussen gerichtet. Ein Zwischenstand hatte ihn nach innen verlegt, weil
+     ein aeusserer Ring an kantigen Flaechen der Kante folgt und dadurch wie
+     eine gezogene Umrandung wirken kann. In der Praxis sah der aeussere
+     Schein besser aus - er hebt die Flaeche vom Hintergrund ab, waehrend der
+     innere sie eher truebte.
+
+     Wichtig ist nur, dass BEIDE Stufen dieselbe Richtung haben. Gemischt
+     springt beim Hovern nicht die Staerke, sondern die Art des Effekts. */
+  --glow-ring:        0 0 8px 1px var(--glow-blue-soft),
+                      0 0 13px 2px var(--glow-pink-soft);
+  /* Etwas zurueckgenommen gegenueber frueher: Beim Hovern wirkte der Schein
+     ueberstrahlt, weil die Flaechen inzwischen duenner sind und weniger Licht
+     schlucken. */
+  --glow-ring-strong: 0 0 6px 1px var(--glow-blue-soft),
+                      0 0 11px 2px var(--glow-pink-soft);
 
   /* --- Spotify (optional, siehe Abschnitt 9) ---------------------------
      Wie stark das Cover als Hintergrund zurueckgenommen wird. Beim Hover
@@ -351,9 +422,14 @@ body {
   pointer-events: none;
   background-color: var(--bg-base);
   background-image: var(--bg-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  /* Die erste Groesse gilt fuer das Rauschen: es soll sich in seiner
+     Originalgroesse kacheln, nicht auf Bildschirmbreite gezogen werden - sonst
+     wird aus feinem Korn ein grobes Muster. Alle weiteren Ebenen fuellen wie
+     gehabt. Bei einem eigenen Bild ohne Rauschen greift cover fuer das Bild,
+     die zusaetzliche Angabe stoert dann nicht. */
+  background-size: 160px 160px, cover, cover, cover;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  background-position: 0 0, center, center, center;
   filter: blur(var(--bg-blur, 0px)) brightness(var(--brightness-bg-image, 1));
 }
 
@@ -875,15 +951,20 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
   align-items: center !important;
   justify-content: center !important;
   overflow: visible !important;
-  /* Auch eingeklappt eine Glaskarte, nicht nur ein freistehender Avatar.
+  /* Kein Rahmen, keine Rundung - dieselbe Sprache wie die Spalten daneben.
 
-     Vorher stand der Avatar nackt in der Ecke; mit Flaeche und Rundung wird
-     daraus ein erkennbares Element, das zum schwebenden Chat passt - gleicher
-     Radius, gleiche Kante. Aufgeklappt waechst dieselbe Karte weiter, es
-     wechselt also nichts, es wird nur groesser. */
-  background-color: var(--panel-color) !important;
-  border: var(--border-subtle) !important;
-  border-radius: var(--panel-radius) !important;
+     Ein Zwischenstand hatte hier eine Karte mit eigenem Rand. Die hob sich ab
+     wie aufgeklebt, weil sonst im Bild nichts umrandet ist: Die Flaechen
+     trennen sich ueber Helligkeit und Lichtkanten, nicht ueber Konturen.
+
+     Nur eine Lichtkante oben, wie an jedem anderen Uebergang auch.
+
+     Die Flaeche ist bewusst duenner als die Liste darueber: Das Panel liegt
+     vorn und soll durchlaessig wirken, nicht wie ein massiver Sockel. */
+  background-color: rgba(0, 0, 0, 0.14) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 1px 0 0 var(--edge-light) !important;
   backdrop-filter: blur(var(--blur-other)) !important;
   z-index: 10 !important;
   /* Dieselbe Wartezeit wie der aeussere Container. Ohne sie sprang die Karte
@@ -919,12 +1000,14 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
   padding: 8px !important;
   gap: 8px !important;
   justify-content: flex-start !important;
+  /* Aufgeklappt etwas heller als eingeklappt, aber weiterhin ohne Rahmen -
+     der Unterschied entsteht ueber die Flaeche, nicht ueber eine Kontur. */
   background-color: var(--panel-color) !important;
-  border: var(--border-subtle) !important;
+  border: none !important;
   backdrop-filter: blur(var(--blur-other)) !important;
-  /* Beim Aufklappen ohne Wartezeit - die Groesse steht sofort, nur Flaeche
-     und Rahmen blenden auf. */
-  transition: background-color 0.26s ease, border-color 0.26s ease !important;
+  /* Beim Aufklappen ohne Wartezeit - die Groesse steht sofort, nur die Flaeche
+     blendet auf. */
+  transition: background-color 0.26s ease !important;
 }
 
 /* Avatar bleibt in beiden Zustaenden gleich gross und wird NICHT ueber margin
@@ -1618,8 +1701,8 @@ html:not(.lv-no-glow) .border__2f4f7.speaking__2f4f7 {
    Im Ruhezustand ohne Schein. Vorher lag auf jedem Knopf und jedem DM-Eintrag
    dauerhaft einer - bei einer langen DM-Liste flimmerte damit die halbe
    Seitenleiste, ohne dass ein einziger Eintrag dadurch wichtiger wurde. */
-.buttons__37e49 button { border-radius: 6px; }
-.channel__972a0 .interactive__972a0 { border-radius: 8px; }
+.buttons__37e49 button { border-radius: var(--panel-radius); }
+.channel__972a0 .interactive__972a0 { border-radius: var(--panel-radius); }
 
 html:not(.lv-no-glow) .buttons__37e49 button,
 html:not(.lv-no-glow) .channel__972a0 .interactive__972a0 {
@@ -1913,11 +1996,7 @@ nav[class*="guilds_"] {
    ueberlaeuft - Nachrichten reichen sonst bis in die Ecken hinein. */
 [class*="base_"] [class*="chat_"] {
   margin: var(--app-gap) var(--app-gap) var(--app-gap) 0 !important;
-  border-radius: var(--panel-radius);
-  border: var(--border-subtle);
-  background-color: var(--chat-fill) !important;
-  box-shadow: var(--chat-lift);
-  overflow: hidden;
+  background-color: var(--depth-chat) !important;
 }
 
 /* Die DM-Liste erbt Flaeche und Kante von sidebarList_ und bleibt selbst
@@ -2143,6 +2222,156 @@ nav[class*="guilds_"] [class*="scroller_"],
 ) [class*="scroller_"] {
   margin-bottom: 16px !important;
 }
+
+/* ============================================================================
+   11. ZENTRIERTE KANALLISTE
+   ----------------------------------------------------------------------------
+   Kategorien und Kanalnamen sitzen mittig statt links angeschlagen. Das ist
+   der auffaelligste Unterschied zu Standard-Discord und zu praktisch jedem
+   anderen Theme - die richten alle links aus.
+
+   Kategorien bekommen zusaetzlich zwei kurze Linien, die den Text einfassen.
+   Sie ersetzen die Einrueckung als Gliederung: Statt "weiter links heisst
+   uebergeordnet" gilt "eingefasst heisst Ueberschrift".
+
+   Kategorien sind h3, das ist in der Kanalliste eindeutig. Die Kanalzeile ist
+   ein Flex-Container mit linkTop_ darin - dort wird zentriert, nicht am
+   Link selbst, sonst wandert auch das Hover-Feld.
+   ========================================================================= */
+
+/* display: flex wird erzwungen. Ohne das laeuft justify-content ins Leere,
+   falls Discord die Ueberschrift als Block auszeichnet - und text-align allein
+   verschiebt den Textknoten nicht, weil er in einem eigenen Kind steckt. */
+/* width: 100% ist hier das Entscheidende, nicht justify-content.
+
+   Die Ueberschrift ist von Haus aus nur so breit wie ihr Text und sitzt links
+   im Container - gemessen 114px von 247px. Zentrieren wirkte deshalb ins
+   Leere: Innerhalb dieser 114px gab es nichts zu verteilen, der Text fuellte
+   sie vollstaendig aus.
+
+   Erst auf voller Breite hat justify-content etwas zu tun. Drei Versuche
+   haben vorher an den Kindern gedreht, das Problem lag aber eine Ebene
+   hoeher. */
+[class*="sidebarList_"] h3 {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  position: relative;
+  letter-spacing: 1.4px;
+}
+
+/* Discords Plus-Knopf sitzt als letztes Kind darin und wuerde mitzentriert -
+   er gehoert aber an den rechten Rand. */
+[class*="sidebarList_"] h3 > span:last-child {
+  position: absolute !important;
+  right: 4px;
+}
+
+/* KEIN Kind darf sich strecken.
+
+   Der Text steckt in einem eigenen Element, und solange das die volle Breite
+   einnimmt, nuetzt ein zentrierter Container nichts - der Text beginnt dann an
+   dessen linker Kante. Zwei Versuche haben einzelne Kinder benannt und lagen
+   daneben; sicherer ist, es allen zu verbieten.
+
+   Der Plus-Knopf ist davon nicht betroffen, der liegt absolut. */
+[class*="sidebarList_"] h3 > * {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+
+/* Die Linien sind FLEX-Kinder, nicht absolut positioniert.
+
+   Dadurch teilen sie sich den Raum, der nach dem Text uebrig bleibt, und
+   reichen von aussen bis an ihn heran - unabhaengig davon, wie lang die
+   Kategorie heisst. Mit fester Breite waeren sie bei "Allgemein" zu lang und
+   bei "Gaming Talk" zu kurz.
+
+   Der Verlauf laesst sie zum Text hin heller werden: aussen fast unsichtbar,
+   innen deutlich. Eine durchgehend gleich starke Linie wirkt wie ein Trenner,
+   dieser Verlauf fasst den Text ein. */
+[class*="sidebarList_"] h3::before,
+[class*="sidebarList_"] h3::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 2px;
+  min-width: 8px;
+  pointer-events: none;
+}
+
+[class*="sidebarList_"] h3::before {
+  margin-right: 10px;
+  background: linear-gradient(to right, transparent, var(--edge-strong));
+}
+
+/* Rechts ist zusaetzlich Platz fuer Discords Plus-Knopf noetig, sonst laeuft
+   die Linie darunter durch. */
+[class*="sidebarList_"] h3::after {
+  margin-left: 10px;
+  margin-right: 22px;
+  background: linear-gradient(to left, transparent, var(--edge-strong));
+}
+
+/* Kanalnamen bleiben BEWUSST linksbuendig.
+
+   Ein Zwischenstand hatte sie zentriert. Das sah ordentlich aus, liest sich
+   aber schlechter: Beim Ueberfliegen einer Liste sucht das Auge eine feste
+   linke Kante, und die faellt weg, wenn jede Zeile woanders beginnt. Bei
+   Ueberschriften ist das anders - die liest man einzeln, nicht im Lauf. */
+
+/* Der geoeffnete Kanal bekommt eine Farbkante links und einen Schein nach
+   innen, statt nur heller hinterlegt zu sein. Die Kante steht senkrecht zur
+   zentrierten Schrift und markiert die Zeile, ohne sie zu verschieben. */
+[class*="sidebarList_"] [class*="modeSelected_"] {
+  box-shadow: inset 2px 0 0 0 var(--glow-pink),
+              inset 0 0 16px rgba(255, 90, 190, 0.10);
+}
+
+/* --- Mitgliederliste ------------------------------------------------------
+   Dieselbe Sprache wie die Kanalliste: Rollenueberschriften zentriert und
+   eingefasst, Eintraege mittig.
+
+   Die Namen bleiben neben dem Avatar, nicht darunter. Im Entwurf standen sie
+   untereinander, was gut aussah - bei langen Namen und vielen Mitgliedern
+   kostet das aber deutlich Hoehe, und die Liste ist ohnehin schon lang. */
+[class*="membersWrap_"] h2,
+[class*="membersWrap_"] h3 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  position: relative;
+  letter-spacing: 1.4px;
+}
+
+[class*="membersWrap_"] :is(h2, h3)::before,
+[class*="membersWrap_"] :is(h2, h3)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 1px;
+  background: var(--edge-light);
+  pointer-events: none;
+}
+[class*="membersWrap_"] :is(h2, h3)::before { left: 8px; }
+[class*="membersWrap_"] :is(h2, h3)::after  { right: 8px; }
+
+/* Avatar und Name zusammen mittig statt links angeschlagen. */
+[class*="membersWrap_"] [class*="layout_"] {
+  justify-content: center !important;
+}
+
+[class*="membersWrap_"] [class*="layout_"] [class*="content_"] {
+  flex: 0 1 auto !important;
+}
+
 
 /* ============================================================================
    10. NACHRICHTENLISTE
