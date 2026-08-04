@@ -11,6 +11,22 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 3.0.1
+
+### Fixed
+
+- A custom background image set through LovelaceSettings was tiled at 160×160
+  instead of filling the screen.
+
+  `background-size` applies per layer. The default gradient has several layers
+  and carried a matching list of sizes, the first of which was meant for the
+  noise. A single image URL is one layer and inherited that first value.
+
+  The noise now sits on its own layer, so the image layer is always `cover`. It
+  stays active with a custom image as well; set `--bg-noise: none` to remove it.
+
+---
+
 ## 3.0.0
 
 Dark edged glass. The look changes substantially, hence the major version.

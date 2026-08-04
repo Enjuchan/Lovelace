@@ -1,7 +1,7 @@
 /**
  * @name Lovelace
  * @author Enju
- * @version 3.0.0
+ * @version 3.0.1
  * @description Frosted glass Discord theme with heart-shaped avatars, collapsible panels and a soft blue-pink glow.
  * @source https://github.com/Enjuchan/Lovelace/blob/main/Lovelace.theme.css
  * @updateUrl https://raw.githubusercontent.com/Enjuchan/Lovelace/main/Lovelace.theme.css
@@ -155,7 +155,6 @@
      verstaerken - je kuerzer der Weg zwischen zwei Farben, desto weniger
      sichtbare Stufen. */
   --bg-image:
-    var(--bg-noise),
     radial-gradient(circle at 22% 18%, var(--glow-blue) 0%, transparent 42%),
     radial-gradient(circle at 82% 80%, var(--glow-pink) 0%, transparent 45%),
     linear-gradient(148deg,
@@ -422,15 +421,36 @@ body {
   pointer-events: none;
   background-color: var(--bg-base);
   background-image: var(--bg-image);
-  /* Die erste Groesse gilt fuer das Rauschen: es soll sich in seiner
-     Originalgroesse kacheln, nicht auf Bildschirmbreite gezogen werden - sonst
-     wird aus feinem Korn ein grobes Muster. Alle weiteren Ebenen fuellen wie
-     gehabt. Bei einem eigenen Bild ohne Rauschen greift cover fuer das Bild,
-     die zusaetzliche Angabe stoert dann nicht. */
-  background-size: 160px 160px, cover, cover, cover;
-  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
-  background-position: 0 0, center, center, center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   filter: blur(var(--bg-blur, 0px)) brightness(var(--brightness-bg-image, 1));
+}
+
+/* Das Rauschen liegt auf einer EIGENEN Ebene, nicht in --bg-image.
+
+   Gegen Streifenbildung im Verlauf gedacht: Ein Farbverlauf ueber eine
+   bildschirmgrosse Flaeche springt zwischen den Farbstufen sichtbar, ein
+   feines Rauschen bricht diese Kanten auf.
+
+   Frueher stand es als erste Ebene mit im Hintergrundbild. Das ging schief,
+   sobald jemand ein eigenes Bild eintrug: Die Groessenangaben sind pro Ebene,
+   und eine einzelne Bild-URL erbte die des Rauschens - das Bild wurde dann in
+   160px-Kacheln wiederholt statt formatfuellend gezeigt.
+
+   Getrennt gehalten stoert es nichts, und wer ein Foto einsetzt, bekommt es
+   ebenfalls: Ein wenig Korn schadet auch dort nicht. Wer es nicht will, setzt
+   --bg-noise auf none. */
+[class*="bg_"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: var(--bg-noise);
+  background-size: 160px 160px;
+  background-repeat: repeat;
+  opacity: 0.5;
 }
 
 /* Zeitstempel als Volltext statt Kurzform.
