@@ -1,7 +1,7 @@
 /**
  * @name Lovelace
  * @author Enju
- * @version 3.0.2
+ * @version 3.0.3
  * @description Frosted glass Discord theme with heart-shaped avatars, collapsible panels and a soft blue-pink glow.
  * @source https://github.com/Enjuchan/Lovelace/blob/main/Lovelace.theme.css
  * @updateUrl https://raw.githubusercontent.com/Enjuchan/Lovelace/main/Lovelace.theme.css
@@ -516,11 +516,11 @@ body {
    Einstellung "Override theme CSS variable" wird dann NICHT mehr gebraucht -
    sie sollte ausgeschaltet sein.
 
-   BEIDE Klassennamen, weil das Plugin sie in 3.7.2 umbenannt hat. Wer noch eine
-   aeltere Fassung nutzt, haette sonst wieder zwei Hintergruende uebereinander.
-   Die alte Schreibweise kann weg, sobald 3.7.2 lange genug draussen ist. */
-[class*="bg_"]:has(.DynamicBackgrounds-bgContainer)::before,
-[class*="bg_"]:has(.BackgroundManager-bgContainer)::before {
+   Bis 3.0.2 stand hier zusaetzlich .BackgroundManager-bgContainer, der alte
+   Klassenname vor der Umbenennung in DynamicBackgrounds 3.7.2. Entfernt, weil
+   3.7.2 zu dem Zeitpunkt noch niemand geladen hatte - es gab also keine
+   Installation, die auf die alte Schreibweise angewiesen gewesen waere. */
+[class*="bg_"]:has(.DynamicBackgrounds-bgContainer)::before {
   display: none;
 }
 

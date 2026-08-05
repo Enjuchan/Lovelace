@@ -11,6 +11,20 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 3.0.3
+
+### Changed
+
+- The rule that hands the background over to DynamicBackgrounds no longer also
+  matches the old `.BackgroundManager-bgContainer`. Only the current class name
+  is left.
+
+  The fallback was added in 3.0.2 for anyone who had updated one of the two but
+  not the other. At that point 3.7.2 had not been downloaded by anyone, so there
+  was no installation that depended on it.
+
+---
+
 ## 3.0.2
 
 ### Changed
