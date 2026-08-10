@@ -1,7 +1,7 @@
 /**
  * @name Lovelace
  * @author Enju
- * @version 3.0.3
+ * @version 3.0.4
  * @description Frosted glass Discord theme with heart-shaped avatars, collapsible panels and a soft blue-pink glow.
  * @source https://github.com/Enjuchan/Lovelace/blob/main/Lovelace.theme.css
  * @updateUrl https://raw.githubusercontent.com/Enjuchan/Lovelace/main/Lovelace.theme.css
@@ -183,6 +183,19 @@
   --blur-popup:     6px;
   --border-main:    1px solid rgba(255, 255, 255, 0.1);
   --border-subtle:  1px solid rgba(255, 255, 255, 0.1);
+
+  /* Weichzeichnung fuer die Befehlsliste ueber dem Eingabefeld.
+
+     Deutlich hoeher als --blur-popup, und das ist der Punkt: Die Liste liegt
+     ueber dem Chat, und was stoert, ist der TEXT darunter. Genau den zeichnet
+     backdrop-filter weg. Eine deckende Flaeche haette ihn nur verdeckt, das
+     sah wie ein Fremdkoerper aus.
+
+     Der hohe Radius ist hier vertretbar, obwohl backdrop-filter der teuerste
+     Effekt im Theme ist: Die Liste ist nur waehrend des Tippens sichtbar, nicht
+     dauerhaft wie die Seitenleisten. Die Kostenwarnung bei --blur-popup gilt
+     fuer Flaechen, die staendig auf- und zugehen. */
+  --blur-autocomplete: 24px;
   --boxshadow:      inset 0 0 10px rgba(100, 100, 100, 0.1);
 
   /* ============ SCHALTER ============================================
@@ -1177,8 +1190,29 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
    sie war damit die auffaelligste Stelle des Fensters, ohne Anlass. */
 [class*="channelBottomBarArea_"] {
   border-radius: var(--panel-radius);
-  backdrop-filter: blur(var(--blur-other));
+  position: relative;
   transition: box-shadow 0.25s ease;
+}
+
+/* Der Blur liegt auf ::before statt auf der Leiste selbst - dieselbe Loesung
+   wie bei den Menues weiter unten, hier aber aus einem anderen Grund.
+
+   Ein Element mit backdrop-filter wird zur Bezugsebene fuer alles, was darin
+   liegt. Der Chat dahinter gehoert dann nicht mehr zu dem, was ein Kindelement
+   weichzeichnen kann. Genau das ist der Befehlsliste passiert: Ihr
+   backdrop-filter lief, hatte aber nichts mehr zu tun, und sie stand mit ihrer
+   Fuellung praktisch nackt ueber dem Chat.
+
+   Auf dem Pseudoelement wirkt die Weichzeichnung unveraendert, ohne die
+   Kindelemente einzuschliessen - ::before hat selbst keine. */
+[class*="channelBottomBarArea_"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  backdrop-filter: blur(var(--blur-other));
 }
 
 html:not(.lv-no-glow) [class*="channelBottomBarArea_"]:focus-within {
@@ -1215,6 +1249,25 @@ html:not(.lv-no-glow) [class*="channelBottomBarArea_"]:focus-within {
 }
 
 #image-context[class*="menu_"] { backdrop-filter: blur(var(--blur-popup)); }
+
+/* --- Befehls-, Emoji- und Erwaehnungsliste ueber dem Eingabefeld --------
+
+   Der Selektor trifft nur den aeusseren Kasten. autocompleteInner__,
+   autocompleteRow__ und autocompleteAttached__ enthalten die Zeichenfolge
+   "autocomplete__" nicht, bleiben also unangetastet - ihre Hintergruende sind
+   transparent und sollen es bleiben, sonst waeren Hover und Auswahl weg.
+
+   Die Fuellung ist --depth-rail, dieselbe wie bei der Serverleiste. Damit
+   spricht die Liste die Sprache des Themes, statt als deckende Platte
+   herauszufallen. Vorher stand hier --background-surface-high, also ein
+   WEISSER Schleier von 15 Prozent ganz ohne Weichzeichnung - ueber einem
+   hellen Hintergrundbild war der Text praktisch weg. */
+[class*="autocomplete__"] {
+  background: var(--depth-rail);
+  border: var(--border-main);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(var(--blur-autocomplete));
+}
 
 [class*="tooltip_"] {
   background: rgba(0, 0, 0, 0.15) !important;

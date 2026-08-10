@@ -11,6 +11,38 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 3.0.4
+
+### Fixed
+
+- **The command, emoji and mention list above the message box is readable
+  again.** It had no rule of its own, so it fell through to Discord's
+  `--background-surface-high`, which the theme sets to white at 15 percent. A
+  pale film with no blur at all, sitting directly on the background image. Over
+  a bright wallpaper the text all but disappeared.
+
+  It now uses `--depth-rail`, the same fill as the server rail, so it speaks the
+  theme's language instead of standing out as a solid slab, plus a much stronger
+  blur through the new `--blur-autocomplete`.
+
+  The blur is what actually solves it: the thing in the way is the chat text
+  behind the list, and blurring removes it rather than covering it up. The high
+  radius is affordable here because the list is only visible while typing, not
+  permanently like the sidebars.
+
+- The blur on the message input bar moved to a pseudo-element.
+
+  An element carrying `backdrop-filter` becomes the reference layer for
+  everything inside it, so the chat behind is no longer part of what a child can
+  blur. The list sits inside that bar, which is why its own blur ran but had
+  nothing left to work on. On `::before` the effect is unchanged, and it no
+  longer encloses the children, since a pseudo-element has none.
+
+  The same construction was already in the file for context menus, there for the
+  opposite reason: to keep the blur off the menu's own contents.
+
+---
+
 ## 3.0.3
 
 ### Changed
