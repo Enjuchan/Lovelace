@@ -11,6 +11,24 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 3.0.5
+
+### Fixed
+
+- **Discord no longer stutters while scrolling, clicking and loading lists.**
+  Several selectors used `:has()` in a way that made the browser recalculate
+  large parts of the app on every DOM change. They now use equivalent selectors
+  without `:has()` on an ancestor of many elements. In measurements the style
+  calculation is roughly nine times shorter.
+
+### Changed
+
+- The glow rule for selected servers carried a second selector for an older
+  DOM. Discord no longer has `li` elements in the server list, so that part
+  matched nothing and has been removed.
+
+---
+
 ## 3.0.4
 
 ### Fixed

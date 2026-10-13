@@ -1,7 +1,7 @@
 /**
  * @name Lovelace
  * @author Enju
- * @version 3.0.4
+ * @version 3.0.5
  * @description Frosted glass Discord theme with heart-shaped avatars, collapsible panels and a soft blue-pink glow.
  * @source https://github.com/Enjuchan/Lovelace/blob/main/Lovelace.theme.css
  * @updateUrl https://raw.githubusercontent.com/Enjuchan/Lovelace/main/Lovelace.theme.css
@@ -35,6 +35,10 @@
    wrapper_ trifft 14 verschiedene Klassen, container_ 17, icon_ 6, title_ 6,
    avatar_ 5, bar_ 3. Ein [class*="wrapper_"] wuerde also 405 Elemente quer
    durch Discord treffen statt der einen gemeinten Karte.
+
+   PERFORMANCE: Kein A:has(B) [class*=C]. Aendert sich der :has()-Zustand von A,
+   muss der Browser alle C unter A neu pruefen, und bei [class*=] sind das praktisch
+   alle Elemente. Gemessen hat jede solche Regel die Stilberechnung etwa verzehnfacht.
 
    Das Panel unten links haengt jetzt an [class*="sidebar_"] [class*="panels_"]
    statt am Hash: sidebar__5e434, panels__5e434 und base__5e434 teilen sich
@@ -712,13 +716,13 @@ div:not([class*="actionButtons_e131a9"]):has(> span[class*="disabledButtonWrappe
 
    Gleiche Spezifitaet, also gewinnt die zuletzt notierte Regel: bei drei
    Bannern greifen alle drei, gerechnet wird mit dem dreifachen Wert. */
-.visual-refresh:not(.lv-classic-titlebar):has(.bd-notice) [class*="base_"] > [class*="bar_"] {
+.visual-refresh:not(.lv-classic-titlebar) [class*="base_"] > #bd-notices:has(> .bd-notice) ~ [class*="bar_"] {
   top: var(--lv-notice-height) !important;
 }
-.visual-refresh:not(.lv-classic-titlebar):has(.bd-notice + .bd-notice) [class*="base_"] > [class*="bar_"] {
+.visual-refresh:not(.lv-classic-titlebar) [class*="base_"] > #bd-notices:has(> .bd-notice + .bd-notice) ~ [class*="bar_"] {
   top: calc(var(--lv-notice-height) * 2) !important;
 }
-.visual-refresh:not(.lv-classic-titlebar):has(.bd-notice + .bd-notice + .bd-notice) [class*="base_"] > [class*="bar_"] {
+.visual-refresh:not(.lv-classic-titlebar) [class*="base_"] > #bd-notices:has(> .bd-notice + .bd-notice + .bd-notice) ~ [class*="bar_"] {
   top: calc(var(--lv-notice-height) * 3) !important;
 }
 
@@ -783,7 +787,7 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) {
 
 /* Alles Bedienbare bleibt anklickbar - ohne das waere die halbe Kopfzeile
    tot, weil eine Ziehflaeche keine Klicks durchlaesst. */
-html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, input, textarea, [role="button"], [role="textbox"], [role="tab"], [class*="search"], svg) {
+html:not(.lv-classic-titlebar) section[class*="title_"] :is(button, a, input, textarea, [role="button"], [role="textbox"], [role="tab"], [class*="search"], svg) {
   -webkit-app-region: no-drag;
 }
 
@@ -1183,7 +1187,7 @@ html:not(.lv-classic-titlebar) section:has([class*="toolbar_"]) :is(button, a, i
 }
 
 [class*="chat_"]:has([class*="actionRow_"]) { border: unset !important; }
-[class*="chat_"]:has([class*="actionRow_"]) [class*="form_"] { margin: unset !important; }
+[class*="chat_"]:has([class*="actionRow_"]) form { margin: unset !important; }
 
 /* Der Schein liegt auf dem Fokus, nicht im Ruhezustand - siehe Abschnitt 8.
    Vorher leuchtete die Leiste dauerhaft, obwohl es dort nichts zu melden gab;
@@ -1827,9 +1831,7 @@ html:not(.lv-no-glow)
    laenglich, damit bleibt "hier bin ich" von "hier ist etwas neu"
    unterscheidbar - ueber Form UND Farbe. */
 html:not(.lv-no-glow)
-[data-list-id="guildsnav"] [class*="item_"][class*="selected_"],
-html:not(.lv-no-glow)
-[data-list-id="guildsnav"] li:has([class*="selected_"]) [class*="item_"][class*="visible_"] {
+[data-list-id="guildsnav"] [class*="item_"][class*="selected_"] {
   background: var(--glow-blue) !important;
   box-shadow: 0 0 6px 1px var(--glow-blue),
               0 0 12px 2px var(--glow-pink-soft);
@@ -1938,7 +1940,7 @@ html:not(.lv-no-glow):not(.lv-no-hearts)
   border-radius: 0 !important;
 }
 
-[class*="sidebar_"] [class*="panels_"] > div:has([class*="coverWrapper_"]):hover [class*="coverWrapper_"] {
+[class*="sidebar_"] [class*="panels_"] > div:hover [class*="coverWrapper_"] {
   transform: scale(1.08);
   filter: blur(calc(var(--spotify-cover-blur) / 3))
           brightness(calc(var(--spotify-cover-brightness) + 0.25));
@@ -1965,12 +1967,12 @@ html:not(.lv-no-glow):not(.lv-no-hearts)
    obere Zeile statt des ganzen Players - genau der Streifen-Effekt.
    Also bleibt er statisch, und stattdessen werden seine Geschwister einzeln
    ueber den Verlauf gehoben. */
-[class*="sidebar_"] [class*="panels_"] > div:has([class*="coverWrapper_"]) > [class*="inner_"] {
+[class*="sidebar_"] [class*="panels_"] > div > [class*="inner_"]:has(> [class*="coverWrapper_"]) {
   position: static !important;
 }
 
-[class*="sidebar_"] [class*="panels_"] > div:has([class*="coverWrapper_"]) > [class*="inner_"] > *:not([class*="coverWrapper_"]),
-[class*="sidebar_"] [class*="panels_"] > div:has([class*="coverWrapper_"]) > [class*="timeline_"] {
+[class*="sidebar_"] [class*="panels_"] > div > [class*="inner_"] > [class*="coverWrapper_"] ~ :not([class*="coverWrapper_"]),
+[class*="sidebar_"] [class*="panels_"] > div > [class*="inner_"]:has(> [class*="coverWrapper_"]) ~ [class*="timeline_"] {
   position: relative;
   z-index: 2;
 }
@@ -2241,7 +2243,7 @@ html.lv-panel-open [class*="sidebar_"] [class*="panels_"] > div:has([class*="cov
    endeten sie beim Hovern 48px UEBER dem Panel, ragten also gar nicht
    darunter. Sie mit auszublenden nahm ihnen sichtbar Platz weg, ohne ein
    Problem zu loesen. Dieselbe Aufteilung wie beim Abstand weiter unten. */
-body:has([class*="panels_"]:hover) [class*="privateChannels_"] [class*="scroller_"] {
+body:has([class*="panels_"]:hover) [data-list-id^="private-channels"] {
   --panel-fade: calc(
     var(--lv-panel-height, 260px) - var(--panel-reserve) + 40px);
 }
