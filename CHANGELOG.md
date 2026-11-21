@@ -11,6 +11,43 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ---
 
+## 4.0.0
+
+### Fixed
+
+- **Works again with the current Discord client.** Discord changed the scheme
+  of its generated class names (`panels_c48ade` became `panels_pog62O`), so
+  every hashed selector and every `[class*="name__"]` fragment stopped matching
+  and large parts of the theme fell back to Discord's look. Selectors now use
+  `[class*="name_"]` wherever that provably hits only the intended element,
+  which survives the next hash change. A few places keep an exact name because
+  no stable anchor exists.
+- Quests is hidden from the DM list again; its link moved to `/quest-home`.
+
+### Changed
+
+- **Clear glass instead of dark edge glass.** Server rail, channel and DM list
+  and member list are blurred glass with boosted colour, a faint tint and a
+  fine light edge between the columns. The rail is one step darker than the
+  lists. The chat is a calmer, darker surface without blur.
+- **Hearts only where they mean something:** your own avatar in the account
+  panel and the icon of the open server. All other avatars and server icons
+  keep Discord's shapes.
+- **No idle animation.** The breathing glow and the pulsing heart are gone.
+  Glow appears on hover, selection and speaking and holds still. Your own
+  avatar keeps a soft resting glow as an anchor.
+
+### Notes
+
+- Removed variables: `--depth-list`, `--depth-chat`, `--depth-blur`. Their
+  role is taken by `--lv-tint-list`, `--lv-tint-chat` and `--lv-blur`. If you overrode the old ones, move your
+  values over.
+- `--lv-glow-anim` no longer has an effect, because there is no animation left
+  to control. It stays defined so that LovelaceSettings keeps working.
+- The screenshots in the README still show the previous look.
+
+---
+
 ## 3.0.5
 
 ### Fixed

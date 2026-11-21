@@ -2,9 +2,9 @@
 
 ![Lovelace](preview.gif)
 
-A frosted glass theme for Discord: translucent surfaces over a background
-image, heart-shaped avatars and server icons, collapsible panels in the bottom
-left, and a soft blue-pink glow that reacts to what you are doing.
+A clear glass theme for Discord: blurred, translucent columns over a background
+image, a heart on your own avatar and the open server, a collapsible panel in
+the bottom left, and a blue-pink glow that appears when something happens.
 
 > **Settings without editing CSS:**
 > [LovelaceSettings](https://github.com/Enjuchan/LovelaceSettings) adds a
@@ -45,18 +45,22 @@ through [LovelaceSettings](https://github.com/Enjuchan/LovelaceSettings):
 
 ## Features
 
-### Glass surfaces
+### Clear glass
 
-Chat, context menus, tooltips, modals, the settings window, the call view,
-pinned messages and profile popouts are translucent with a backdrop blur, so
-the background image stays visible throughout the client.
+The server rail, the channel and DM list and the member list are clear glass:
+a strong blur with boosted colour, only a faint dark tint, and a fine light
+edge between the columns. The rail sits one step darker than the lists, so the
+columns stay apart without gaps. The chat is a calmer, darker surface without
+blur, so text stays readable over bright images. Context menus, tooltips,
+modals, the settings window, the call view, pinned messages and profile popouts
+keep their translucent backdrop.
 
-### Heart-shaped avatars and server icons
+### Hearts where they mean something
 
-Discord's SVG masks are replaced with a scalable polygon, so the shape holds at
-every size - server list, member list, message list, profile popouts and the
-account panel. The polygon lives in a single variable, so it can be swapped for
-any other outline.
+Your own avatar in the account panel and the icon of the server you have open
+are hearts. Everything else keeps Discord's shapes, so the heart marks "you"
+and "here". The outline is a scalable polygon in a single variable, so it can
+be swapped for any other shape.
 
 ### Collapsible bottom-left panel
 
@@ -67,9 +71,10 @@ during the animation and the motion stays smooth.
 
 ### Reactive glow
 
-A slow breathing glow on panels, the selected server and the active DM, a
-stronger pulse while someone is speaking in voice, and a rim that brightens on
-hover. Two colours, blue and pink, defined in one place.
+Glow means something is happening: hover, the selected server, the active DM,
+someone speaking in voice. At rest nothing glows and nothing moves, except your
+own avatar, which stays lit as an anchor. Two colours, blue and pink, defined
+in one place.
 
 ### Enlarged emoji and GIF picker
 
@@ -105,7 +110,7 @@ it carries information.
 
 - Full timestamps on every message instead of Discord's short form
 - Gold gradient on progress bars
-- Speaking indicator as a pulsing ring rather than a flat outline
+- Speaking indicator as a glowing ring rather than a flat outline
 - Montserrat as the interface font
 
 ---
@@ -205,8 +210,12 @@ All adjustable values sit in the `:root` block near the top of the file.
 | `--heart-clip` | The heart polygon - replace it to change the avatar shape |
 | `--titlebar-height` | Height of the window controls in the header row |
 | `--winbuttons-space` | Space kept clear on the right for the window controls |
-| `--list-color` | Fill behind the server, channel, DM and member lists |
-| `--blur-list` | Backdrop blur on those lists, `0px` by default |
+| `--lv-blur` / `--lv-saturate` | Blur and colour boost of the glass columns |
+| `--lv-tint-rail` / `--lv-tint-list` / `--lv-tint-chat` | Dark tint of the server rail, the lists and the chat |
+| `--lv-edge` | The fine light edge between the columns |
+| `--lv-accent` / `--lv-accent-2` | Accent colours, taken from the glow colours |
+| `--list-color` | Extra layer over the tint of the lists |
+| `--blur-list` | Added to the blur of the lists, `0px` by default |
 
 ### If the window controls overlap something
 
@@ -229,20 +238,20 @@ Some switches are variables:
 
 ```css
 :root {
-  --lv-glow-anim: none;    /* stop the breathing glow */
   --lv-timestamp: revert;  /* short timestamps */
   --lv-picker: revert;     /* normal picker height */
   --list-color: transparent; --list-border: transparent;  /* no list fills */
 }
 ```
 
-Three of them are classes on the `<html>` element instead, because a variable
+Four of them are classes on the `<html>` element instead, because a variable
 can change a value but cannot switch a rule off - and these features each span
 several rules:
 
 | Class | Effect |
 | --- | --- |
-| `lv-no-hearts` | Round avatars and Discord's own server icon shapes |
+| `lv-no-hearts` | No heart on your own avatar and the open server |
+| `lv-no-glow` | No glow anywhere |
 | `lv-classic-titlebar` | Discord's separate title bar row is back |
 | `lv-panel-open` | The bottom-left panel stays expanded |
 
@@ -271,14 +280,15 @@ most effective change. Server icons carry one soft shadow at rest and pick up
 the second colour only on hover, so the list stays cheap no matter how many
 servers you are in.
 
-Animations respect `prefers-reduced-motion`: with that system setting enabled,
-the breathing glow holds still.
+Nothing in the theme animates while you are idle. The glow appears on hover,
+selection and speaking and then holds still, so an open Discord costs no
+animation work in the background. Transitions respect `prefers-reduced-motion`.
 
 ---
 
 ## Notes
 
-Discord's generated class names (`container__37e49` and similar) change with
+Discord's generated class names (`panels_pog62O` and similar) change with
 client updates. When a part of the theme stops working after a Discord update,
 that is almost always the cause. Selectors were checked against Discord's live
 DOM: where a name provably matched exactly one class, the theme uses
